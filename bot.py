@@ -33,7 +33,7 @@ async def welcome_new_members(update: Update, context: ContextTypes.DEFAULT_TYPE
             task = asyncio.create_task(kick_after_timeout(context, update.effective_chat.id, member))
             pending_tasks[member.id] = task
 
-async def kick_after_timeout(context, chat_id, member, timeout=30):
+async def kick_after_timeout(context, chat_id, member, timeout=60):
     await asyncio.sleep(timeout)
     if member.id in pending_tasks:
         try:
