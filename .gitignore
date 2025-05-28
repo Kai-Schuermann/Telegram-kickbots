@@ -1,4 +1,16 @@
-.env
-__pycache__/
+# Virtuelle Umgebung
 venv/
+env/
+
+# Umgebungsvariablen
+.env
+
+# Python-Caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
 *.pyc
+
+# Sonstiges
+*.log
