@@ -1,13 +1,16 @@
 # 🤖 Telegram Anti-Bot Guard
 
-Ein einfacher Telegram-Bot, der automatisch neue Bots aus einer Gruppe entfernt.
+## Beschreibung
 
-## 🔧 Funktionen
+Dieser Bot entfernt automatisch neu hinzugefügte Bots aus Telegram-Gruppen.  
+Er erkennt sowohl offizielle Bots (Telegram-Botkonten) als auch automatisierte Benutzerkonten, die sich wie Bots verhalten können, und blockiert diese, sobald sie der Gruppe beitreten.
 
-- Überwacht neue Mitglieder einer Telegram-Gruppe.
-- Erkennt, ob ein neues Mitglied ein Bot ist.
-- Entfernt automatisch neue Bots aus der Gruppe.
-- Sendet eine Benachrichtigung über die Entfernung.
+## Features
+
+- Entfernt neue Bots automatisch aus der Gruppe.
+- Blockiert auch automatisierte Benutzerkonten, die nicht als offizielle Bots markiert sind.
+- Nutzt eine einfache Button-Bestätigung, damit menschliche Nutzer nicht fälschlicherweise entfernt werden.
+- Keine Löschung oder Beeinflussung bereits bestehender Gruppenmitglieder beim Neustart.
 
 ## 🛠️ Voraussetzungen
 
