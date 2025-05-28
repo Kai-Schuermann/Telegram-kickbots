@@ -54,3 +54,8 @@ Bot läuft... Drücke STRG+C zum Beenden.
 - Der Bot **muss Adminrechte** in der Telegram-Gruppe besitzen, **inklusive** der Berechtigung **„Mitglieder entfernen“**.
 - Der Bot entfernt **nur neue** Bot-Mitglieder, die der Gruppe **nach dem Start** beitreten.
 - Bereits vorhandene Bots in der Gruppe werden **nicht entfernt**.
+
+
+## Lizenz
+
+Dieses Projekt steht unter der MIT-Lizenz – siehe [LICENSE](./LICENSE) für weitere Informationen.
