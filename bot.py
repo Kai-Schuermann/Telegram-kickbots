@@ -1,5 +1,6 @@
 import os
 import asyncio
+import random
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -8,9 +9,17 @@ from telegram.ext import (
 
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-
-# Aufgaben-Tracking pro User
 pending_tasks = {}
+pending_answers = {}
+
+# Beispiel-Fragen
+questions = [
+    {"question": "Was ergibt 2 + 2?", "correct": "4", "options": ["3", "4", "5"]},
+    {"question": "Welche Farbe hat der Himmel?", "correct": "Blau", "options": ["Grün", "Blau", "Rot"]},
+    {"question": "Welcher Tag kommt nach Montag?", "correct": "Dienstag", "options": ["Sonntag", "Dienstag", "Freitag"]},
+    {"question": "Wie viele Beine hat eine Katze?", "correct": "4", "options": ["2", "4", "6"]},
+    {"question": "Was trinkt eine Kuh?", "correct": "Wasser", "options": ["Milch", "Cola", "Wasser"]},
+]
 
 async def welcome_new_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message is None or update.message.new_chat_members is None:
@@ -21,15 +30,18 @@ async def welcome_new_members(update: Update, context: ContextTypes.DEFAULT_TYPE
             await context.bot.ban_chat_member(update.effective_chat.id, member.id)
             await update.message.reply_text(f"Bot {member.full_name} wurde entfernt.")
         else:
-            keyboard = InlineKeyboardMarkup([
-                [InlineKeyboardButton("Ich bin kein Bot", callback_data=f"verify_{member.id}")]
-            ])
+            question = random.choice(questions)
+            buttons = [
+                InlineKeyboardButton(opt, callback_data=f"answer_{member.id}_{'correct' if opt == question['correct'] else 'wrong'}")
+                for opt in question["options"]
+            ]
+            keyboard = InlineKeyboardMarkup([buttons])
             await update.message.reply_text(
-                f"Willkommen {member.full_name}! Bitte bestätige, dass du kein Bot bist:",
-                reply_markup=keyboard
+                f"Willkommen {member.full_name}! Bitte beantworte die Frage:\n\n<b>{question['question']}</b>",
+                reply_markup=keyboard,
+                parse_mode="HTML"
             )
 
-            # Starte Timeout-Task
             task = asyncio.create_task(kick_after_timeout(context, update.effective_chat.id, member))
             pending_tasks[member.id] = task
 
@@ -38,7 +50,7 @@ async def kick_after_timeout(context, chat_id, member, timeout=60):
     if member.id in pending_tasks:
         try:
             await context.bot.ban_chat_member(chat_id, member.id)
-            await context.bot.send_message(chat_id, f"{member.full_name} wurde entfernt – keine Bestätigung erhalten.")
+            await context.bot.send_message(chat_id, f"{member.full_name} wurde gesperrt – keine richtige Antwort erhalten.")
         except Exception as e:
             print(f"Fehler beim Entfernen von {member.full_name}: {e}")
         finally:
@@ -47,15 +59,20 @@ async def kick_after_timeout(context, chat_id, member, timeout=60):
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
-    user_id = query.from_user.id
     data = query.data
+    user_id = query.from_user.id
 
-    if data == f"verify_{user_id}":
+    if data.startswith(f"answer_{user_id}_"):
+        result = data.split("_")[-1]
         task = pending_tasks.pop(user_id, None)
-        if task:
-            task.cancel()
-        await query.edit_message_text("Danke für die Bestätigung! Du bleibst in der Gruppe.")
+
+        if result == "correct":
+            if task:
+                task.cancel()
+            await query.edit_message_text("✅ Richtig beantwortet – willkommen in der Gruppe!")
+        else:
+            await query.edit_message_text("❌ Falsche Antwort – du wurdest entfernt.")
+            await context.bot.ban_chat_member(query.message.chat.id, user_id)
     else:
         await query.answer("Das ist nicht für dich.", show_alert=True)
 
